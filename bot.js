@@ -1,13 +1,18 @@
 var rawjs = require('raw.js');
 var reddit = new rawjs("raw.js example script");
-
 var fs = require('fs');
 fs.readFile('secret.txt','utf8',function (err, data) {
 	if (err) throw err;
 	var info = data.split(" ");
 	reddit.setupOAuth2(info[0], info[1], "http://www.example.com/redditoauth");
 	console.log("'"+info[0]+"'\n'"+info[1]+"'\n'"+info[2]+"'\n'"+info[3]+"'\n");
-	
+	reddit.auth({"username":info[2], "password":info[3]}, function(err, response) {
+			    if(err) {
+			        console.log("Unable to authenticate user: " + err);
+			    } else {
+       				console.log(response);
+			    }
+	    	});
 
 	var CommentStream = rawjs.CommentStream;
 	var stream = new CommentStream();
@@ -16,24 +21,17 @@ fs.readFile('secret.txt','utf8',function (err, data) {
 	    //console.log("New comment in subreddit " + comment.subreddit + ", content " + comment.body);
 	    if(comment.author.toLowerCase().indexOf("sand500")!=-1){
 	    	console.log(comment.body+"\n");
-	    	reddit.auth({"username":info[2], "password":info[3]}, function(err, response) {
-			    if(err) {
-			        console.log("Unable to authenticate user: " + err);
-			    } else {
-			        console.log(response);
-			        reddit.comment(comment.name,"please dont do this",function(err,comment){
-			        	console.log("comment post response: "+err);
-
-			        });
-			        // The user is now authenticated. If you want the temporary bearer token, it's available as response.access_token
-			        // and will be valid for response.expires_in seconds.
-			        // raw.js will automatically refresh the bearer token as it expires. Unlike web apps, no refresh tokens are available.
-			    }
-	    	});
+	    	        
+	        reddit.comment(comment.name,"please dont do this",function(err,comment){
+	        	console.log("comment post response: "+err);
+	        });
+		
 	    }
-	     if(comment.body.toLowerCase().indexOf("buzzfeed")!=-1){
+	     if(comment.body.toLowerCase().indexOf("www.buzzfeed.com/")!=-1){
 	    	console.log(comment.body+"\n");
+	    	
 	    }
+	    
 	    x++;
 	    if(x%1000 == 0){
 	    	console.log(x);
